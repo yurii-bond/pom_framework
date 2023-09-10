@@ -79,3 +79,69 @@ def test_inputs():
     assert input_el.get_attribute('value') == '50'
 
     driver.quit()
+
+def test_key_presses():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'Key Presses')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    assert driver.current_url == f'{HOME_PAGE_URL}/key_presses'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Key Presses'
+    sleep(1)
+    input_el = driver.find_element(By.XPATH, "//input[@type='text']")
+    assert input_el.is_displayed()
+    input_el.send_keys(Keys.TAB)
+    sleep(1)
+    assert driver.find_element(By.ID, value="result").text == "You entered: TAB"
+    driver.quit()
+
+def test_redirect_link():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'Redirect Link')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    assert driver.current_url == f'{HOME_PAGE_URL}/redirector'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Redirection'
+    sleep(1)
+    link = driver.find_element(By.LINK_TEXT, 'here')
+    link.click()
+    sleep(2)
+    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == "Status Codes"
+
+    driver.quit()
+
+def test_status_codes():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'Status Codes')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
+    assert driver.find_element(By.XPATH, "//*[@id='content']/div/ul")
+    sleep(1)
+    status_code_element = driver.find_element(By.LINK_TEXT, '200')
+    status_code_element.click()
+    sleep(2)
+    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes/200'
+    driver.back()
+    sleep(1)
+    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
+    sleep(1)
+    link = driver.find_element(By.LINK_TEXT, 'here')
+    link.click()
+    sleep(1)
+    assert driver.current_url == "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml"
+    driver.quit()
