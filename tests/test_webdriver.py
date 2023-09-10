@@ -5,7 +5,6 @@ from selenium.webdriver.common.by import By
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
 
-
 def test_open_website_and_check_title():
     driver = webdriver.Chrome()
     driver.maximize_window()
@@ -78,4 +77,63 @@ def test_inputs():
 
     assert input_el.get_attribute('value') == '50'
 
+    driver.quit()
+
+def test_key_presses():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(f'{HOME_PAGE_URL}/key_presses')
+    sleep(1)
+    input_el = driver.find_element(By.XPATH, "//input[@type='text']")
+    input_el.send_keys('1 ')
+    sleep(1)
+    result = driver.find_element(By.ID, 'result')
+    assert result.text == 'You entered: SPACE'
+    sleep(1)
+    driver.quit()
+
+def test_redirector():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(f'{HOME_PAGE_URL}/redirector')
+    sleep(1)
+    redirector = driver.find_element(By.ID, "redirect")
+    redirector.click()
+    sleep(1)
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
+    driver.quit()
+
+def test_status_codes():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(f'{HOME_PAGE_URL}/status_codes')
+    sleep(1)
+    status_codes = driver.find_element(By.LINK_TEXT, "200")
+    status_codes.click()
+    sleep(1)
+    assert driver.find_element(By.XPATH, '//*[contains(text(), "returned a 200")]')
+    here = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
+    here.click()
+    sleep(1)
+    status_codes = driver.find_element(By.LINK_TEXT, "301")
+    status_codes.click()
+    sleep(1)
+    assert driver.find_element(By.XPATH, '//*[contains(text(), "returned a 301")]')
+    here1 = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
+    here1.click()
+    sleep(1)
+    status_codes = driver.find_element(By.LINK_TEXT, "404")
+    status_codes.click()
+    sleep(1)
+    assert driver.find_element(By.XPATH, '//*[contains(text(), "returned a 404")]')
+    here2 = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
+    here2.click()
+    sleep(1)
+    status_codes = driver.find_element(By.LINK_TEXT, "500")
+    status_codes.click()
+    sleep(1)
+    assert driver.find_element(By.XPATH, '//*[contains(text(), "returned a 500")]')
+    here2 = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
+    here2.click()
+    sleep(1)
     driver.quit()
