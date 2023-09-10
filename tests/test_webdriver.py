@@ -144,4 +144,5 @@ def test_status_codes():
     link.click()
     sleep(1)
     assert driver.current_url == "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml"
+
     driver.quit()
