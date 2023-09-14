@@ -19,7 +19,6 @@ jobs:
 
     steps:
     - uses: browser-actions/setup-chrome@v1
-    - name: Install Chrome
     - run: chrome --version
     
     - uses: actions/checkout@v3
