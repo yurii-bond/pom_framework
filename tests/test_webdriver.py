@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver import Keys, ActionChains
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
+from seletools.actions import drag_and_drop
 from selenium.webdriver.support import expected_conditions as EC
 import os
 
@@ -132,24 +133,13 @@ def test_dra_and_drop():
     assert driver.current_url == f'{HOME_PAGE_URL}/drag_and_drop'
     assert driver.find_element(By.TAG_NAME, 'h3').text == 'Drag and Drop'
     sleep(1)
-    column_a = driver.find_element(By.ID, "column-a")
-    column_b = driver.find_element(By.ID, "column-b")
-    assert column_a.text == "A"
-    assert column_b.text == "B"
-    sleep(1)
-
-    action = ActionChains(driver)
-    action.drag_and_drop_by_offset(column_a, 200, 150).perform()
-    # action.release(column_b)
-    sleep(1)
-
-    column_a = driver.find_element(By.ID, "column-a")
-    column_b = driver.find_element(By.ID, "column-b")
-
-    assert column_a.text == "B"
-    assert column_b.text == "A"
-
+    source = driver.find_element(By.ID, "column-a")
+    target = driver.find_element(By.ID, "column-b")
+    drag_and_drop(driver, source, target)
     sleep(2)
+    assert source.text == "B"
+    assert target.text == "A"
+    sleep(1)
 
     driver.quit()
 
