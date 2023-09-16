@@ -1,8 +1,11 @@
 from time import sleep
 from selenium import webdriver
-from selenium.webdriver import Keys, ActionChains
+from selenium.common import TimeoutException
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
+from seletools.actions import drag_and_drop
 from selenium.webdriver.support import expected_conditions as EC
 import os
 
@@ -28,10 +31,9 @@ def test_open_website_and_check_elements():
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     try:
-        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "id-of-element")))
-    except:
-        driver.quit()
-
+        element = WebDriverWait(driver, 10, poll_frequency=50).until(EC.presence_of_element_located((By.ID, "id-of-element")))
+    except TimeoutException:
+        print("Loading took too much time!")
     web_element = driver.find_element(By.CLASS_NAME, 'heading')
     assert web_element.is_displayed()
     assert web_element.text == 'Welcome to the-internet'
@@ -109,7 +111,7 @@ def test_hovers():
 
     avatars = driver.find_elements(By.XPATH, "//div[@class='figure']")
     for i, avatar in enumerate(avatars):
-        invisible_el = driver.find_element(By.XPATH, f"//div[@class='figure' or text() == "")][{i+1}]/div/h5")
+        invisible_el = driver.find_element(By.XPATH, f"//div[@class='figure'][{i+1}]/div/h5")
         assert not invisible_el.is_displayed()
         action = ActionChains(driver)
         action.move_to_element(avatar).perform()
@@ -132,24 +134,13 @@ def test_dra_and_drop():
     assert driver.current_url == f'{HOME_PAGE_URL}/drag_and_drop'
     assert driver.find_element(By.TAG_NAME, 'h3').text == 'Drag and Drop'
     sleep(1)
-    column_a = driver.find_element(By.ID, "column-a")
-    column_b = driver.find_element(By.ID, "column-b")
-    assert column_a.text == "A"
-    assert column_b.text == "B"
-    sleep(1)
-
-    action = ActionChains(driver)
-    action.drag_and_drop_by_offset(column_a, 200, 150).perform()
-    # action.release(column_b)
-    sleep(1)
-
-    column_a = driver.find_element(By.ID, "column-a")
-    column_b = driver.find_element(By.ID, "column-b")
-
-    assert column_a.text == "B"
-    assert column_b.text == "A"
-
+    source = driver.find_element(By.ID, "column-a")
+    target = driver.find_element(By.ID, "column-b")
+    drag_and_drop(driver, source, target)
     sleep(2)
+    assert source.text == "B"
+    assert target.text == "A"
+    sleep(1)
 
     driver.quit()
 
