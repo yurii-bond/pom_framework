@@ -5,7 +5,7 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import os
-
+from seletools.actions import drag_and_drop
 from selenium.webdriver.support.wait import WebDriverWait
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
@@ -134,20 +134,21 @@ def test_dra_and_drop():
     sleep(1)
     column_a = driver.find_element(By.ID, "column-a")
     column_b = driver.find_element(By.ID, "column-b")
-    assert column_a.text == "A"
-    assert column_b.text == "B"
+    drag_and_drop(driver, column_a, column_b)
+    assert column_a.text == "B"
+    assert column_b.text == "A"
     sleep(1)
 
-    action = ActionChains(driver)
-    action.drag_and_drop_by_offset(column_a, 200, 150).perform()
-    # action.release(column_b)
-    sleep(1)
+    # action = ActionChains(driver)
+    # action.drag_and_drop_by_offset(column_a, 200, 150).perform()
+    # # action.release(column_b)
+    # sleep(1)
 
     column_a = driver.find_element(By.ID, "column-a")
     column_b = driver.find_element(By.ID, "column-b")
-
-    assert column_a.text == "B"
-    assert column_b.text == "A"
+    drag_and_drop(driver, column_a, column_b)
+    assert column_a.text == "A"
+    assert column_b.text == "B"
 
     sleep(2)
 
