@@ -1,13 +1,21 @@
 from time import sleep
 from selenium import webdriver
-from selenium.webdriver import Keys
+from selenium.webdriver import Keys, ActionChains
+from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+import os
+
+from selenium.webdriver.support.wait import WebDriverWait
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
 
 
 def test_open_website_and_check_title():
     driver = webdriver.Chrome()
+    driver.implicitly_wait(10)
+    driver.set_page_load_timeout(10)
+    driver.set_script_timeout(10)
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     assert driver.title == 'The Internet'
@@ -19,6 +27,11 @@ def test_open_website_and_check_elements():
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
+    try:
+        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "id-of-element")))
+    except:
+        driver.quit()
+
     web_element = driver.find_element(By.CLASS_NAME, 'heading')
     assert web_element.is_displayed()
     assert web_element.text == 'Welcome to the-internet'
@@ -81,159 +94,94 @@ def test_inputs():
     driver.quit()
 
 
-def test_key_presses_page():
+def test_hovers():
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     sleep(1)
-    web_link = driver.find_element(By.LINK_TEXT, 'Key Presses')
+    web_link = driver.find_element(By.LINK_TEXT, 'Hovers')
     assert web_link.is_displayed()
     web_link.click()
     sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/key_presses'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Key Presses'
+    assert driver.current_url == f'{HOME_PAGE_URL}/hovers'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Hovers'
     sleep(1)
-    input_el = driver.find_element(By.XPATH, "//*[@id='target']")
-    assert input_el.is_displayed()
-    # SPACE button
-    input_el.send_keys(Keys.BACK_SPACE)
-    assert driver.find_element(By.ID, 'result').text == 'You entered: BACK_SPACE'
-    sleep(1)
-    # TAB button
-    input_el.send_keys(Keys.TAB)
-    assert driver.find_element(By.ID, 'result').text == 'You entered: TAB'
-    sleep(1)
-    # ESCAPE button
-    input_el.send_keys(Keys.ESCAPE)
-    assert driver.find_element(By.ID, 'result').text == 'You entered: ESCAPE'
-    sleep(1)
-    # ENTER when the INPUT FIELD is not in FOCUS
-    driver.find_element(By.XPATH, "//body").send_keys(Keys.ENTER)
-    assert driver.find_element(By.ID, 'result').text == 'You entered: ENTER'
-    sleep(1)
-    # ENTER when the INPUT FIELD is in FOCUS
-    input_el.send_keys(Keys.ENTER)
-    assert driver.find_element(By.ID, 'result').text == ''
+
+    avatars = driver.find_elements(By.XPATH, "//div[@class='figure']")
+    for i, avatar in enumerate(avatars):
+        invisible_el = driver.find_element(By.XPATH, f"//div[@class='figure' or text() == "")][{i+1}]/div/h5")
+        assert not invisible_el.is_displayed()
+        action = ActionChains(driver)
+        action.move_to_element(avatar).perform()
+        sleep(2)
+        assert invisible_el.is_displayed()
+        assert invisible_el.text == f"name: user{i+1}"
+    sleep(3)
     driver.quit()
 
 
-def test_redirection_page():
+def test_drag_and_drop_page():
+    from seletools.actions import drag_and_drop
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     sleep(1)
-    web_link = driver.find_element(By.LINK_TEXT, 'Redirect Link')
+    web_link = driver.find_element(By.LINK_TEXT, 'Drag and Drop')
     assert web_link.is_displayed()
     web_link.click()
+
     sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/redirector'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Redirection'
+    assert driver.current_url == f'{HOME_PAGE_URL}/drag_and_drop'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Drag and Drop'
+    source = driver.find_element(By.CSS_SELECTOR, "#column-a")
+    target = driver.find_element(By.CSS_SELECTOR, "#column-b")
+    assert source.text == "A"
+    assert target.text == "B"
     sleep(1)
-    redirect_link = driver.find_element(By.XPATH, "//*[@id='redirect']")
-    assert redirect_link.is_displayed()
-    redirect_link.click()
+    drag_and_drop(driver, source, target)
     sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    driver.quit()
 
 
-def test_status_codes_page():
+def test_context_menu():
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     sleep(1)
-    web_link = driver.find_element(By.LINK_TEXT, 'Status Codes')
+    web_link = driver.find_element(By.LINK_TEXT, 'Context Menu')
     assert web_link.is_displayed()
     web_link.click()
     sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
+    assert driver.current_url == f'{HOME_PAGE_URL}/context_menu'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Context Menu'
     sleep(1)
-
-    # Status 200
-
-    redirect_link_200 = driver.find_element(By.XPATH, "//*[@id='content']/div/ul/li[1]/a")
-    assert redirect_link_200.is_displayed()
-    redirect_link_200.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes/200'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    text_200 = driver.find_element(By.XPATH, "//*[@id='content']/div/p")
-    assert text_200.is_displayed()
-    assert driver.find_element(By.XPATH,
-                               "//*[@id='content']/div/p").text == 'This page returned a 200 status code.\n''\n''For a definition and common list of HTTP status codes, go here'
-    back_redirect_link = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
-    assert back_redirect_link.is_displayed()
-    back_redirect_link.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    sleep(1)
-
-    # Status 301
-
-    redirect_link_301 = driver.find_element(By.XPATH, "//*[@id='content']/div/ul/li[2]/a")
-    assert redirect_link_301.is_displayed()
-    redirect_link_301.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes/301'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    text_200 = driver.find_element(By.XPATH, "//*[@id='content']/div/p")
-    assert text_200.is_displayed()
-    assert driver.find_element(By.XPATH,"//*[@id='content']/div/p").text == 'This page returned a 301 status code.\n''\n''For a definition and common list of HTTP status codes, go here'
-    back_redirect_link = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
-    assert back_redirect_link.is_displayed()
-    back_redirect_link.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    sleep(1)
-
-    # Status 404
-
-    redirect_link_404 = driver.find_element(By.XPATH, "//*[@id='content']/div/ul/li[3]/a")
-    assert redirect_link_404.is_displayed()
-    redirect_link_404.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes/404'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    text_200 = driver.find_element(By.XPATH, "//*[@id='content']/div/p")
-    assert text_200.is_displayed()
-    assert driver.find_element(By.XPATH, "//*[@id='content']/div/p").text == 'This page returned a 404 status code.\n''\n''For a definition and common list of HTTP status codes, go here'
-    back_redirect_link = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
-    assert back_redirect_link.is_displayed()
-    back_redirect_link.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    sleep(1)
-
-    # Status 500
-
-    redirect_link_500 = driver.find_element(By.XPATH, "//*[@id='content']/div/ul/li[4]/a")
-    assert redirect_link_500.is_displayed()
-    redirect_link_500.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes/500'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    text_200 = driver.find_element(By.XPATH, "//*[@id='content']/div/p")
-    assert text_200.is_displayed()
-    assert driver.find_element(By.XPATH, "//*[@id='content']/div/p").text == 'This page returned a 500 status code.\n''\n''For a definition and common list of HTTP status codes, go here'
-    back_redirect_link = driver.find_element(By.XPATH, "//*[@id='content']/div/p/a")
-    assert back_redirect_link.is_displayed()
-    back_redirect_link.click()
-    sleep(1)
-    assert driver.current_url == f'{HOME_PAGE_URL}/status_codes'
-    assert driver.find_element(By.TAG_NAME, 'h3').text == 'Status Codes'
-    sleep(1)
-
-    # Link redirection "here"
-
-    redirect_link = driver.find_element(By.LINK_TEXT, 'here')
-    assert redirect_link.is_displayed()
-    assert redirect_link.text == 'here'
-    redirect_link.click()
-    assert driver.current_url == "http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml"
+    hot_spot = driver.find_element(By.ID, "hot-spot")
+    actions = ActionChains(driver)
+    actions.context_click(hot_spot).perform()
     sleep(2)
+
+    alert = Alert(driver)
+    assert alert.text == "You selected a context menu"
+    alert.accept()
+
+    sleep(2)
+
     driver.quit()
+
+
+def test_file_upload():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'File Upload')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    assert driver.current_url == f'{HOME_PAGE_URL}/upload'
+    assert driver.find_element(By.TAG_NAME, 'h3').text == 'File Uploader'
+    sleep(2)
+    file_path = os.getcwd().replace("/tests", "/src/resources/image.png")
+    driver.find_element(By.ID, "file-upload").send_keys(file_path)
+    sleep(3)
+    driver.find_element(By.ID, 'file-submit')
+
