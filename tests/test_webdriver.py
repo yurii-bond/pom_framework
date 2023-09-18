@@ -1,3 +1,4 @@
+import pytest
 from time import sleep
 
 import chromedriver_autoinstaller
@@ -9,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 
 from selenium.webdriver.support.wait import WebDriverWait
+from seletools.actions import drag_and_drop
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
 
@@ -32,7 +34,7 @@ def test_open_website_and_check_elements():
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     try:
-        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "id-of-element")))
+        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "page-footer")))
     except:
         driver.quit()
 
@@ -113,7 +115,7 @@ def test_hovers():
 
     avatars = driver.find_elements(By.XPATH, "//div[@class='figure']")
     for i, avatar in enumerate(avatars):
-        invisible_el = driver.find_element(By.XPATH, f"//div[@class='figure' or text() == "")][{i+1}]/div/h5")
+        invisible_el = driver.find_element(By.XPATH, f"//div[@class = 'figure' or text() = ''][{i+1}]/div/h5")
         assert not invisible_el.is_displayed()
         action = ActionChains(driver)
         action.move_to_element(avatar).perform()
@@ -124,7 +126,7 @@ def test_hovers():
     driver.quit()
 
 
-def test_dra_and_drop():
+def test_drag_and_drop():
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
@@ -143,8 +145,9 @@ def test_dra_and_drop():
     sleep(1)
 
     action = ActionChains(driver)
-    action.drag_and_drop_by_offset(column_a, 200, 150).perform()
+    # action.drag_and_drop(column_a, column_b).pause(2).perform()
     # action.release(column_b)
+    drag_and_drop(driver, column_a, column_b)
     sleep(1)
 
     column_a = driver.find_element(By.ID, "column-a")
@@ -201,4 +204,85 @@ def test_file_upload():
     sleep(3)
     driver.find_element(By.ID, 'file-submit')
 
+def test_key_presses():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'Key Presses')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    input_el = driver.find_element(By.XPATH, value="//input[@type='text']")
+    assert input_el.is_displayed()
+    input_el.send_keys(Keys.TAB, Keys.ENTER, Keys.ESCAPE)
+    driver.quit()
 
+def test_redirection():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(2)
+    web_link = driver.find_element(By.LINK_TEXT, 'Redirect Link')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    input_el = driver.find_element(By.XPATH, value="//a[@href='redirect']")
+    assert input_el.is_displayed()
+    input_el.click()
+    web_link = driver.find_element(By.XPATH, value="//h3['Status Codes']")
+    driver.quit()
+def test_status_codes():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    driver.get(HOME_PAGE_URL)
+    sleep(1)
+    web_link = driver.find_element(By.LINK_TEXT, 'Status Codes')
+    assert web_link.is_displayed()
+    web_link.click()
+    sleep(1)
+    input_el = driver.find_element(By.XPATH, value="//a[@href='status_codes/200']")
+    assert input_el.is_displayed()
+    #
+    # input_el3 = driver.find_element(By.XPATH, value="//a[@href='status_codes/500']")
+    # assert input_el3.is_displayed()
+
+    input_el.click()
+    sleep(1)
+    summary = driver.find_element(By.XPATH, value="//p[contains(text(), 'This page returned a 200 status code.')]")
+    assert summary.is_displayed()
+    back_link200 = driver.find_element(By.XPATH, value="//a[@href='/status_codes']")
+    assert back_link200.is_displayed()
+    back_link200.click()
+
+    input_el1 = driver.find_element(By.XPATH, value="//a[@href='status_codes/301']")
+    assert input_el1.is_displayed()
+    input_el1.click()
+    sleep(1)
+    summary301 = driver.find_element(By.XPATH, value="//p[contains(text(), 'This page returned a 301 status code.')]")
+    assert summary301.is_displayed()
+    back_link301 = driver.find_element(By.XPATH, value="//a[@href='/status_codes']")
+    assert back_link301.is_displayed()
+    back_link301.click()
+
+    input_el2 = driver.find_element(By.XPATH, value="//a[@href='status_codes/404']")
+    assert input_el2.is_displayed()
+    input_el2.click()
+    sleep(1)
+    summary404 = driver.find_element(By.XPATH, value="//p[contains(text(), 'This page returned a 404 status code.')]")
+    assert summary404.is_displayed()
+    back_link404 = driver.find_element(By.XPATH, value="//a[@href='/status_codes']")
+    assert back_link404.is_displayed()
+    back_link404.click()
+
+    input_el3 = driver.find_element(By.XPATH, value="//a[@href='status_codes/500']")
+    assert input_el3.is_displayed()
+    input_el3.click()
+    sleep(1)
+    summary500 = driver.find_element(By.XPATH, value="//p[contains(text(), 'This page returned a 500 status code.')]")
+    assert summary500.is_displayed()
+    back_link500 = driver.find_element(By.XPATH, value="//a[@href='/status_codes']")
+    assert back_link500.is_displayed()
+
+
+    driver.quit()
