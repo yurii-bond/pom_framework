@@ -1,4 +1,6 @@
 from time import sleep
+
+import chromedriver_autoinstaller
 from selenium import webdriver
 from selenium.webdriver import Keys, ActionChains
 from selenium.webdriver.common.alert import Alert
@@ -9,6 +11,8 @@ import os
 from selenium.webdriver.support.wait import WebDriverWait
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
+
+chromedriver_autoinstaller.install()
 
 
 def test_open_website_and_check_title():
