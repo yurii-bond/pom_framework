@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - name: Install software
-      run: sudo apt install wget & wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb & sudo dpkg -i google-chrome-stable_current_amd64.deb
+      run: sudo apt install wget && wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && sudo dpkg -i google-chrome-stable_current_amd64.deb
     
     - uses: actions/checkout@v3
     - name: Set up Python 3.10
