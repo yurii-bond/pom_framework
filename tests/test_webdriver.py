@@ -1,3 +1,4 @@
+import pytest
 from time import sleep
 from selenium import webdriver
 from selenium.webdriver import Keys, ActionChains
@@ -7,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 
 from selenium.webdriver.support.wait import WebDriverWait
-
+from seletools.actions import drag_and_drop
 
 HOME_PAGE_URL = "https://the-internet.herokuapp.com"
 
@@ -29,16 +30,15 @@ def test_open_website_and_check_elements():
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
     try:
-        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "id-of-element")))
+        element = WebDriverWait(driver, 30, poll_frequency=100).until(EC.presence_of_element_located((By.ID, "page-footer")))
     except:
         driver.quit()
+
     web_element = driver.find_element(By.CLASS_NAME, 'heading')
     assert web_element.is_displayed()
     assert web_element.text == 'Welcome to the-internet'
     sleep(1)
     driver.quit()
-
-
 
 
 def test_open_checkboxes_page_and_check_their_manipulation():
@@ -111,12 +111,18 @@ def test_hovers():
 
     avatars = driver.find_elements(By.XPATH, "//div[@class='figure']")
     for i, avatar in enumerate(avatars):
-        invisible_el = driver.find_element(By.XPATH, f"//div[@class='figure'][{i+1}]/div/h5")
-
+        invisible_el = driver.find_element(By.XPATH, f"//div[@class = 'figure' or text() = ''][{i+1}]/div/h5")
+        assert not invisible_el.is_displayed()
+        action = ActionChains(driver)
+        action.move_to_element(avatar).perform()
+        sleep(2)
+        assert invisible_el.is_displayed()
+        assert invisible_el.text == f"name: user{i+1}"
+    sleep(3)
     driver.quit()
 
 
-def changes_test_drag_and_drop():
+def test_drag_and_drop():
     driver = webdriver.Chrome()
     driver.maximize_window()
     driver.get(HOME_PAGE_URL)
@@ -128,7 +134,6 @@ def changes_test_drag_and_drop():
     assert driver.current_url == f'{HOME_PAGE_URL}/drag_and_drop'
     assert driver.find_element(By.TAG_NAME, 'h3').text == 'Drag and Drop'
     sleep(1)
-
     column_a = driver.find_element(By.ID, "column-a")
     column_b = driver.find_element(By.ID, "column-b")
     assert column_a.text == "A"
@@ -136,13 +141,18 @@ def changes_test_drag_and_drop():
     sleep(1)
 
     action = ActionChains(driver)
-    action.drag_and_drop(column_b, column_a).perform()
+    # action.drag_and_drop(column_a, column_b).pause(2).perform()
+    # action.release(column_b)
+    drag_and_drop(driver, column_a, column_b)
     sleep(1)
 
     column_a = driver.find_element(By.ID, "column-a")
     column_b = driver.find_element(By.ID, "column-b")
 
     assert column_a.text == "B"
+    assert column_b.text == "A"
+
+    sleep(2)
 
     driver.quit()
 
@@ -189,3 +199,5 @@ def test_file_upload():
     driver.find_element(By.ID, "file-upload").send_keys(file_path)
     sleep(3)
     driver.find_element(By.ID, 'file-submit')
+
+    driver.quit()
