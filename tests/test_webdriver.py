@@ -101,7 +101,7 @@ def test_hovers():
 
     avatars = driver.find_elements(By.XPATH, "//div[@class='figure']")
     for avatar in avatars:
-        # Используем явное ожидание невидимости элемента
+
         WebDriverWait(driver, 10).until_not(EC.visibility_of(avatar.find_element(By.XPATH, ".//div/h5")))
 
     driver.quit()
@@ -178,7 +178,7 @@ def test_file_upload():
     driver.quit()
 
 
-# Добавлен блок if __name__ == "__main__": для запуска только при вызове файла напрямую
+
 if __name__ == "__main__":
     # Вызов функций для выполнения тестов
     test_open_website_and_check_title()
